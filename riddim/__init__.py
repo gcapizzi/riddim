@@ -63,3 +63,31 @@ class RiddimguideBeautifulSoupParser:
             return links[0]['href']
         else:
             return False
+
+
+class RiddimguideSearchEngine:
+
+    def __init__(self, parser_factory, http_client=RequestsHttpClient):
+        self.parser_factory = parser_factory
+        self.http_client = http_client
+
+    def _query_url(self, query):
+        return 'http://www.riddimguide.com/tunes?q=' + query
+
+    def search(self, query):
+        results = []
+        current_query = self._query_url(query)
+
+        while True:
+            html_results = self.http_client.get(current_query)
+            parser = self.parser_factory.from_html(html_results)
+            results.extend(parser.tunes())
+
+            next = parser.next()
+            if next:
+                current_query = next
+            else:
+                break
+
+        return results
+

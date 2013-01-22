@@ -22,13 +22,11 @@
 import unittest
 
 from nose.tools import *
-from exam.mock import Mock
+from exam.mock import Mock, call
 
 from requests.exceptions import RequestException
 
-from bs4 import BeautifulSoup
-
-from riddim import RequestsHttpClient, RiddimguideBeautifulSoupParser
+from riddim import RequestsHttpClient, RiddimguideSearchEngine
 
 
 class RequestsHttpClientTest(unittest.TestCase):
@@ -57,39 +55,40 @@ class RequestsHttpClientTest(unittest.TestCase):
         self.assertEquals(False, response)
 
 
-class RiddimguideBeautifulSoupParserTest(unittest.TestCase):
+class RiddimguideSearchEngineTest(unittest.TestCase):
 
-    def test_parse(self):
-        soup = BeautifulSoup(open('tests/test.html').read())
-        parser = RiddimguideBeautifulSoupParser(soup)
-        tunes = parser.tunes()
+    def test_search(self):
+        parser_1 = Mock()
+        parser_1.next.return_value = 'next_url'
+        parser_1.tunes.return_value = [{'one': 1}, {'two': 2}]
 
-        self.assertEquals(7, len(tunes))
+        parser_2 = Mock()
+        parser_2.next.return_value = False
+        parser_2.tunes.return_value = [{'three': 3}, {'four': 4}]
 
-        tune = {'artist': 'Bob Marley & Wailers',
-                'song': 'Exodus',
-                'riddim': 'Exodus',
-                'year': '1977',
-                'label': 'Tuff Gong',
-                'producer': 'Robert Nesta \'Bob\' Marley & The Wailers'}
+        parser_factory = Mock()
+        parser_factory_returns = [parser_1, parser_2]
+        def parser_factory_mock(*args):
+            return parser_factory_returns.pop(0)
+        parser_factory.from_html = Mock(side_effect=parser_factory_mock)
 
-        self.assertEquals(tune, tunes[1])
+        http_client = Mock()
+        http_client_returns = ['page 1', 'page 2']
+        def http_client_mock(*args):
+            return http_client_returns.pop(0)
+        http_client.get = Mock(side_effect=http_client_mock)
 
-    def test_next(self):
-        soup = BeautifulSoup(open('tests/test.html').read())
-        parser = RiddimguideBeautifulSoupParser(soup)
+        engine = RiddimguideSearchEngine(parser_factory, http_client)
 
-        self.assertFalse(parser.next())
+        tunes = engine.search('query')
 
-        soup_nav = BeautifulSoup(open('tests/test_nav.html').read())
-        parser_nav = RiddimguideBeautifulSoupParser(soup_nav)
+        expected_calls = [call('http://www.riddimguide.com/tunes?q=query'),
+                          call('next_url')]
+        self.assertEquals(expected_calls, http_client.get.call_args_list)
 
-        self.assertEquals("/tunes?q=one%20love&c=&page=2", parser_nav.next())
+        expected_calls = [call('page 1'), call('page 2')]
+        self.assertEquals(expected_calls, parser_factory.from_html.call_args_list)
 
+        expected_tunes = [{'one': 1}, {'two': 2}, {'three': 3}, {'four': 4}]
+        self.assertEquals(expected_tunes, tunes)
 
-# class RiddimguideSearchEngineTest(unittest.TestCase):
-
-#     def test_search(self):
-#         http_client = Mock()
-#         parser = Mock()
-#         engine = RiddimguideSearchEngine(http_client, parser)
