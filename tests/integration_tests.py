@@ -27,7 +27,9 @@ from exam.mock import Mock, call
 from requests import Session
 from bs4 import BeautifulSoup
 
-from riddim import RiddimguideBeautifulSoupParser, RiddimguideBeautifulSoupParserFactory, RequestsHttpClient, RiddimguideSearchEngine
+from riddim import (RiddimguideBeautifulSoupParser,
+                    RiddimguideBeautifulSoupParserFactory,
+                    RequestsHttpClient, RiddimguideSearchEngine)
 
 
 class RiddimguideBeautifulSoupParserIntegrationTest(unittest.TestCase):
