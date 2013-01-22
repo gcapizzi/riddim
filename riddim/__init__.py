@@ -68,7 +68,8 @@ class RiddimguideBeautifulSoupParser:
 class RiddimguideBeautifulSoupParserFactory:
 
     def from_html(self, html):
-        return BeautifulSoup(html)
+        soup = BeautifulSoup(unicode(html))
+        return RiddimguideBeautifulSoupParser(soup)
 
 
 class RiddimguideSearchEngine:
