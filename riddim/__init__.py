@@ -29,9 +29,9 @@ class RequestsHttpClient:
     def __init__(self, session):
         self.session = session
 
-    def get(self, url, params):
+    def get(self, url, params = {}):
         try:
-            return self.session.get(url, params).text()
+            return self.session.get(url, params=params).text
         except RequestException:
             return False
 

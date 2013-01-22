@@ -34,14 +34,13 @@ class RequestsHttpClientTest(unittest.TestCase):
     def test_get_ok(self):
         session = Mock()
         resp = Mock()
-        resp.text.return_value = 'some text'
+        resp.text = 'some text'
         session.get.return_value = resp
         http_client = RequestsHttpClient(session)
 
         response = http_client.get('an url', {'some': 'params'})
 
-        session.get.assert_called_with('an url', {'some': 'params'})
-        resp.text.assert_called_with()
+        session.get.assert_called_with('an url', params={'some': 'params'})
         self.assertEquals('some text', response)
 
     def test_get_fail(self):
@@ -51,7 +50,7 @@ class RequestsHttpClientTest(unittest.TestCase):
 
         response = http_client.get('an url', {'some': 'params'})
 
-        session.get.assert_called_with('an url', {'some': 'params'})
+        session.get.assert_called_with('an url', params={'some': 'params'})
         self.assertEquals(False, response)
 
 
