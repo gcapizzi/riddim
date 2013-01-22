@@ -69,5 +69,13 @@ class RiddimguideSearchEngineIntegrationTest(unittest.TestCase):
         http_client = RequestsHttpClient(Session())
         engine = RiddimguideSearchEngine(parser_factory, http_client)
 
-        tunes = engine.search('bob marley')
+        tunes = engine.search('bob marley exodus')
+
+        tune = {'artist': 'Bob Marley & Wailers',
+                'song': 'Exodus',
+                'riddim': 'Exodus',
+                'year': '1977',
+                'label': 'Tuff Gong',
+                'producer': 'Robert Nesta \'Bob\' Marley & The Wailers'}
+        self.assertEquals(tune, tunes[0])
 
