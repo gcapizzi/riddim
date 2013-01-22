@@ -24,9 +24,10 @@ import unittest
 from nose.tools import *
 from exam.mock import Mock, call
 
+from requests import Session
 from bs4 import BeautifulSoup
 
-from riddim import RiddimguideBeautifulSoupParser
+from riddim import RiddimguideBeautifulSoupParser, RiddimguideBeautifulSoupParserFactory, RequestsHttpClient, RiddimguideSearchEngine
 
 
 class RiddimguideBeautifulSoupParserIntegrationTest(unittest.TestCase):
@@ -57,4 +58,14 @@ class RiddimguideBeautifulSoupParserIntegrationTest(unittest.TestCase):
         parser_nav = RiddimguideBeautifulSoupParser(soup_nav)
 
         self.assertEquals("/tunes?q=one%20love&c=&page=2", parser_nav.next())
+
+
+class RiddimguideSearchEngineIntegrationTest(unittest.TestCase):
+
+    def test_search(self):
+        parser_factory = RiddimguideBeautifulSoupParserFactory()
+        http_client = RequestsHttpClient(Session())
+        engine = RiddimguideSearchEngine(parser_factory, http_client)
+
+        tunes = engine.search('bob marley')
 
