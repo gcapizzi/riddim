@@ -87,13 +87,15 @@ class RiddimguideSearchEngine:
 
         while True:
             html_results = self.http_client.get(current_query)
+
+            if not html_results:
+                break
+
             parser = self.parser_factory.from_html(html_results)
             results.extend(parser.tunes())
+            current_query = parser.next()
 
-            next = parser.next()
-            if next:
-                current_query = next
-            else:
+            if not current_query:
                 break
 
         return results
