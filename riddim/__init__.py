@@ -65,6 +65,12 @@ class RiddimguideBeautifulSoupParser:
             return False
 
 
+class RiddimguideBeautifulSoupParserFactory:
+
+    def from_html(self, html):
+        return BeautifulSoup(html)
+
+
 class RiddimguideSearchEngine:
 
     def __init__(self, parser_factory, http_client=RequestsHttpClient):
