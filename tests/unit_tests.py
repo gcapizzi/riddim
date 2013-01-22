@@ -82,7 +82,7 @@ class RiddimguideSearchEngineTest(unittest.TestCase):
         tunes = engine.search('query')
 
         expected_calls = [call('http://www.riddimguide.com/tunes?q=query'),
-                          call('next_url')]
+                          call('http://www.riddimguide.com/next_url')]
         self.assertEquals(expected_calls, http_client.get.call_args_list)
 
         expected_calls = [call('page 1'), call('page 2')]

@@ -64,12 +64,15 @@ class RiddimguideBeautifulSoupParserIntegrationTest(unittest.TestCase):
 
 class RiddimguideSearchEngineIntegrationTest(unittest.TestCase):
 
-    def test_search(self):
+    def setUp(self):
         parser_factory = RiddimguideBeautifulSoupParserFactory()
         http_client = RequestsHttpClient(Session())
-        engine = RiddimguideSearchEngine(parser_factory, http_client)
 
-        tunes = engine.search('bob marley exodus')
+        self.engine = RiddimguideSearchEngine(parser_factory, http_client)
+
+    def test_search_with_one_result(self):
+
+        tunes = self.engine.search('bob marley exodus')
 
         tune = {'artist': 'Bob Marley & Wailers',
                 'song': 'Exodus',
@@ -79,3 +82,14 @@ class RiddimguideSearchEngineIntegrationTest(unittest.TestCase):
                 'producer': 'Robert Nesta \'Bob\' Marley & The Wailers'}
         self.assertEquals(tune, tunes[0])
 
+    def test_search_with_paging(self):
+
+        tunes = self.engine.search('bob marley')
+
+        tune = {'artist': 'Bob Marley & Wailers credited as The Wailers',
+                'song': 'Love And Affection',
+                'riddim': 'Love And Affection',
+                'year': '1965',
+                'label': 'Ska Beat',
+                'producer': ''}
+        self.assertEquals(tune, tunes[-1])

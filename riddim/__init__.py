@@ -19,6 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+import re
+from urlparse import urljoin
+
 from requests.exceptions import RequestException
 
 from bs4 import BeautifulSoup
@@ -41,18 +44,26 @@ class RiddimguideBeautifulSoupParser:
     def __init__(self, soup):
         self.soup = soup
 
+    def _remove_escapes(self, text):
+        regex = re.compile('(\n|\t)')
+        return regex.sub('', text)
+
+    def _text(self, element):
+        text = element.get_text().strip()
+        return self._remove_escapes(text)
+
     def tunes(self):
         rows = self.soup.select('.results tr')
 
         tunes = []
         for row in rows[1:]:
             columns = row.find_all('td')
-            tunes.append({'artist':   columns[0].get_text().strip(),
-                          'song':     columns[1].get_text().strip(),
-                          'riddim':   columns[2].get_text().strip(),
-                          'year':     columns[3].get_text().strip(),
-                          'label':    columns[4].get_text().strip(),
-                          'producer': columns[5].get_text().strip()})
+            tunes.append({'artist':   self._text(columns[0]),
+                          'song':     self._text(columns[1]),
+                          'riddim':   self._text(columns[2]),
+                          'year':     self._text(columns[3]),
+                          'label':    self._text(columns[4]),
+                          'producer': self._text(columns[5])})
 
         return tunes
 
@@ -74,12 +85,17 @@ class RiddimguideBeautifulSoupParserFactory:
 
 class RiddimguideSearchEngine:
 
-    def __init__(self, parser_factory, http_client=RequestsHttpClient):
+    BASE_URL = 'http://www.riddimguide.com'
+
+    def __init__(self, parser_factory, http_client):
         self.parser_factory = parser_factory
         self.http_client = http_client
 
+    def _url(self, path):
+        return urljoin(self.BASE_URL, path)
+
     def _query_url(self, query):
-        return 'http://www.riddimguide.com/tunes?q=' + query
+        return self._url('/tunes?q=' + query)
 
     def search(self, query):
         results = []
@@ -93,10 +109,14 @@ class RiddimguideSearchEngine:
 
             parser = self.parser_factory.from_html(html_results)
             results.extend(parser.tunes())
-            current_query = parser.next()
+            next = parser.next()
 
-            if not current_query:
+            if not next:
                 break
+
+            current_query = self._url(next)
+
+            print current_query
 
         return results
 
