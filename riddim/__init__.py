@@ -52,20 +52,21 @@ class RiddimguideBeautifulSoupParser:
         text = element.get_text().strip()
         return self._remove_escapes(text)
 
+    def _tune_from_columns(self, columns):
+        return {'artist':   self._text(columns[0]),
+                'song':     self._text(columns[1]),
+                'riddim':   self._text(columns[2]),
+                'year':     self._text(columns[3]),
+                'label':    self._text(columns[4]),
+                'producer': self._text(columns[5])}
+
+    def _tune_from_row(self, row):
+        columns = row.find_all('td')
+        return self._tune_from_columns(columns)
+
     def tunes(self):
         rows = self.soup.select('.results tr')
-
-        tunes = []
-        for row in rows[1:]:
-            columns = row.find_all('td')
-            tunes.append({'artist':   self._text(columns[0]),
-                          'song':     self._text(columns[1]),
-                          'riddim':   self._text(columns[2]),
-                          'year':     self._text(columns[3]),
-                          'label':    self._text(columns[4]),
-                          'producer': self._text(columns[5])})
-
-        return tunes
+        return [self._tune_from_row(row) for row in rows[1:]]
 
     def next(self):
         links = self.soup.select('.tunes_navigation a[rel=next]')
