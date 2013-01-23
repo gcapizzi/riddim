@@ -22,9 +22,30 @@
 import argparse
 from sys import exit
 
+from requests import Session
+
+from riddim import (RiddimguideBeautifulSoupParserFactory, RequestsHttpClient,
+                    RiddimguideSearchEngine)
+
+
+DEFAULT_FORMAT = '{artist} - {song} [{riddim}]'
+
 
 def main():
-  pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument('query')
+    parser.add_argument('--format', '-f', default=DEFAULT_FORMAT)
+
+    args = parser.parse_args()
+
+    parser_factory = RiddimguideBeautifulSoupParserFactory()
+    http_client = RequestsHttpClient(Session())
+    engine = RiddimguideSearchEngine(parser_factory, http_client)
+
+    tunes = engine.search(args.query)
+
+    for tune in tunes:
+        print args.format.format(**tune)
 
 
 if __name__ == '__main__':

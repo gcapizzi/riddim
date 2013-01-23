@@ -117,7 +117,4 @@ class RiddimguideSearchEngine:
 
             current_query = self._url(next)
 
-            print current_query
-
         return results
-

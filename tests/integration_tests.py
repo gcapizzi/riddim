@@ -93,3 +93,4 @@ class RiddimguideSearchEngineIntegrationTest(unittest.TestCase):
                 'label': 'Ska Beat',
                 'producer': ''}
         self.assertEquals(tune, tunes[-1])
+
